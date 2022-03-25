@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	badger "github.com/dgraph-io/badger/v3"
 	// "github.com/gocolly/colly"
 )
 
@@ -60,8 +62,14 @@ func crawlWikipedia(article string) () {
 }
 
 func main() {
-    const workers = 250
 
+    db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+    const workers = 250
+    
     wg := new(sync.WaitGroup)
     in := make(chan string, 2*workers)
     defer timeTrack(time.Now(), "main")
@@ -86,6 +94,10 @@ func main() {
     for _, line := range lines {
         if line != "" {
             in <- line
+            dberr := db.Update(func(txn *badger.Txn) error {
+                err := txn.Set([]byte(line), []byte(time))
+                return err
+            })
         }
     }
     close(in)
