@@ -16,7 +16,7 @@ func main() {
 	// var user_input string
 	// fmt.Print("Enter a search term: ")
 	// fmt.Scanln(&user_input)
-	user_input := "american"
+	user_input := "anti"
 	fmt.Println("Searching for:", user_input)
 	// open a new index
 
@@ -30,7 +30,7 @@ func main() {
 	query := bleve.NewMatchQuery(user_input)
 	search := bleve.NewSearchRequest(query)
 	search.Highlight = bleve.NewHighlightWithStyle("html")
-	search.Fields = []string{"Title", "Body"}
+	search.Fields = []string{"Title"}
 	search.Size = 10
 	searchResults, err := index.Search(search)
 	if err != nil {

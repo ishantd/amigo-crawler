@@ -5,6 +5,7 @@ import (
 
 	"github.com/blevesearch/bleve/v2"
 	badger "github.com/dgraph-io/badger/v3"
+	uuid "github.com/google/uuid"
 )
 
 type WikiDoc struct {
@@ -37,6 +38,7 @@ func main() {
 		err := item.Value(func(v []byte) error {
 			wiki_doc := WikiDoc{Title: string(k), Body: string(v)}
 			index_data = append(index_data, wiki_doc)
+			index.Index(uuid.New().String(), index_data)
 			return err
 		})
 		if err != nil {
@@ -46,7 +48,6 @@ func main() {
 		return err
 	})
 
-	index.Index("check", index_data)
 
 	// search for some text
 	query := bleve.NewMatchQuery("computer")
