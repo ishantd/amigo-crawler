@@ -19,10 +19,9 @@ func main() {
 	defer it.Close()
 	for it.Rewind(); it.Valid(); it.Next() {
 	  item := it.Item()
-	  k := item.Key()
 	  err := item.Value(func(v []byte) error {
-		fmt.Printf("key=%s, value=%s\n", k, v)
 		count += 1
+		return err
 	  })
 	  if err != nil {
 		return err
