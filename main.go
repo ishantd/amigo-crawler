@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -12,7 +11,7 @@ import (
 	"time"
 
 	badger "github.com/dgraph-io/badger/v3"
-	// "github.com/gocolly/colly"
+	"github.com/gocolly/colly"
 )
 
 func IsUrl(str string) bool {
@@ -41,9 +40,10 @@ func timeTrack(start time.Time, name string) {
     log.Printf("%s took %s", name, elapsed)
 }
 
-func crawlWikipedia(article string) (string) {
+func crawlWikipedia(article string, db *badger.DB) (string) {
 
 	split_url := strings.Split(article, ":")
+    article_name := split_url[len(split_url)-1]
 	article_urlified := strings.ReplaceAll(split_url[len(split_url)-1], " ", "_")
 	crawl_url := "https://en.wikipedia.org/wiki/" + article_urlified
 
@@ -52,23 +52,20 @@ func crawlWikipedia(article string) (string) {
         return ""
     }
 	
-    client := &http.Client{}
+    c := colly.NewCollector(
+        colly.AllowedDomains("en.wikipedia.org"),
+    )
 
-    res, err := http.NewRequest("GET", crawl_url, nil)
-    if err != nil {
-        log.Printf("Error fetching: %v", err)
-    }
-    
-    resp, err := client.Do(res)
-
-    if err != nil {
-        return ""
-    }
-
-    fmt.Println(resp)
+    c.OnHTML("body", func(e *colly.HTMLElement) {
+        data := e.ChildText("p")
+        db.Update(func(txn *badger.Txn) error {
+            err := txn.Set([]byte(article_name), []byte(data))
+            return err
+        })
+    })
 
 
-    defer resp.Body.Close()
+    c.Visit(crawl_url)
 	return "true"
 }
 
@@ -87,7 +84,7 @@ func main() {
 
     fmt.Println("Starting to crawl Wikipedia")
 
-    lines, err := readLines("../wiki1m.txt")
+    lines, err := readLines("../wiki1k.txt")
     if err != nil {
         log.Fatalf("readLines: %s", err)
     }
@@ -97,7 +94,7 @@ func main() {
         go func() {
             defer wg.Done()
             for article := range in {
-                res := crawlWikipedia(article)
+                res := crawlWikipedia(article, db)
                 fmt.Println(res)
             }
         }()
@@ -107,7 +104,6 @@ func main() {
         if line != "" {
             in <- line
         }
-        break
     }
     close(in)
     wg.Wait()
