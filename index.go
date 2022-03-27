@@ -16,7 +16,7 @@ type WikiDoc struct {
 func main() {
 	// open a new index
 	mapping := bleve.NewIndexMapping()
-	index, err := bleve.New("test2.bleve", mapping)
+	index, err := bleve.New("test3.bleve", mapping)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -46,7 +46,7 @@ func main() {
 		return err
 	})
 
-	index.Index("id", index_data)
+	index.Index("check", index_data)
 
 	// search for some text
 	query := bleve.NewMatchQuery("computer")
