@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/blevesearch/bleve/v2"
 	badger "github.com/dgraph-io/badger/v3"
@@ -14,10 +16,17 @@ type WikiDoc struct {
 }
 
 
+func timeTrack(start time.Time, name string) {
+    elapsed := time.Since(start)
+    log.Printf("%s took %s", name, elapsed)
+}
+
 func main() {
 	// open a new index
+	defer timeTrack(time.Now(), "main")
 	mapping := bleve.NewIndexMapping()
-	index, err := bleve.New("test6.bleve", mapping)
+	index, err := bleve.New("test7.bleve", mapping)
+
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -40,7 +49,6 @@ func main() {
 			batch.Index(uuid.New().String(), wiki_doc)
 			i++
 			if i > 100 {
-				fmt.Println("indexing: ", i)
 				index.Batch(batch)
 				i = 0
 			}
