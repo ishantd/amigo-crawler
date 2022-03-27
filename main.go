@@ -60,11 +60,12 @@ func crawlWikipedia(article string, db *badger.DB) (int) {
         data := e.ChildText("p")
         db_err = db.Update(func(txn *badger.Txn) error {
             err := txn.Set([]byte(article_name), []byte(data))
+            fmt.Println(db_err)
             return err
         })
     })
     if db_err != nil {
-        log.Fatal(db_err)
+        fmt.Println(db_err)
         return -1
     }
 
@@ -77,7 +78,7 @@ func main() {
 
     db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
     if err != nil {
-        log.Fatal(err)
+        fmt.Println(err)
     }
     defer db.Close()
     const workers = 250
@@ -90,7 +91,7 @@ func main() {
 
     lines, err := readLines("../wiki1k.txt")
     if err != nil {
-        log.Fatalf("readLines: %s", err)
+        fmt.Println("readLines: %s", err)
     }
     var count int = 0
     for i := 0; i < workers; i++ {
