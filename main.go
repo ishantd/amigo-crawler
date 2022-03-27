@@ -88,7 +88,7 @@ func main() {
 
     fmt.Println("Starting to crawl Wikipedia")
 
-    lines, err := readLines("../wiki1k.txt")
+    lines, err := readLines("../wiki1m.txt")
     if err != nil {
         fmt.Println("readLines: %s", err)
     }
