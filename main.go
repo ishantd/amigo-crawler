@@ -104,8 +104,6 @@ func main() {
         }()
     }
 
-    fmt.Println("Total pages crawled and saved into badger DB: ", count)
-
     for _, line := range lines {
         if line != "" {
             in <- line
@@ -113,4 +111,5 @@ func main() {
     }
     close(in)
     wg.Wait()
+    fmt.Println("Total pages crawled and saved into badger DB: ", count)
 }
