@@ -10,6 +10,7 @@ import (
 func main() {
   // Open the Badger database located in the /tmp/badger directory.
   // It will be created if it doesn't exist.
+  var count int = 0
   db, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
   db.View(func(txn *badger.Txn) error {
 	opts := badger.DefaultIteratorOptions
@@ -21,7 +22,7 @@ func main() {
 	  k := item.Key()
 	  err := item.Value(func(v []byte) error {
 		fmt.Printf("key=%s, value=%s\n", k, v)
-		return nil
+		count += 1
 	  })
 	  if err != nil {
 		return err
@@ -34,5 +35,7 @@ func main() {
 	  log.Fatal(err)
   }
   defer db.Close()
-  // Your code here…
+  
+  fmt.Println("count: ", count)
+
 }
