@@ -40,7 +40,7 @@ func timeTrack(start time.Time, name string) {
     log.Printf("%s took %s", name, elapsed)
 }
 
-func crawlWikipedia(article string, db *badger.DB) (string) {
+func crawlWikipedia(article string, db *badger.DB) (int) {
 
 	split_url := strings.Split(article, ":")
     article_name := split_url[len(split_url)-1]
@@ -49,24 +49,28 @@ func crawlWikipedia(article string, db *badger.DB) (string) {
 
     if !IsUrl(crawl_url) {
         fmt.Println(crawl_url)
-        return ""
+        return -1
     }
 	
     c := colly.NewCollector(
         colly.AllowedDomains("en.wikipedia.org"),
     )
-
+    var db_err error
     c.OnHTML("body", func(e *colly.HTMLElement) {
         data := e.ChildText("p")
-        db.Update(func(txn *badger.Txn) error {
+        db_err = db.Update(func(txn *badger.Txn) error {
             err := txn.Set([]byte(article_name), []byte(data))
             return err
         })
     })
+    if db_err != nil {
+        log.Fatal(db_err)
+        return -1
+    }
 
 
     c.Visit(crawl_url)
-	return "true"
+	return 1
 }
 
 func main() {
@@ -88,17 +92,19 @@ func main() {
     if err != nil {
         log.Fatalf("readLines: %s", err)
     }
-
+    var count int = 0
     for i := 0; i < workers; i++ {
         wg.Add(1)
         go func() {
             defer wg.Done()
             for article := range in {
                 res := crawlWikipedia(article, db)
-                fmt.Println(res)
+                count += res
             }
         }()
     }
+
+    fmt.Println("Total pages crawled and saved into badger DB: ", count)
 
     for _, line := range lines {
         if line != "" {
