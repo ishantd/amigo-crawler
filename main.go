@@ -60,7 +60,6 @@ func crawlWikipedia(article string, db *badger.DB) (int) {
         data := e.ChildText("p")
         db_err = db.Update(func(txn *badger.Txn) error {
             err := txn.Set([]byte(article_name), []byte(data))
-            fmt.Println(db_err)
             return err
         })
     })
