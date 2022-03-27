@@ -20,7 +20,7 @@ func main() {
 	fmt.Println("Searching for:", user_input)
 	// open a new index
 
-	index, err := bleve.Open("test3.bleve")
+	index, err := bleve.Open("test6.bleve")
 	fmt.Println(index)
 	if err != nil {
 		fmt.Println(err)
