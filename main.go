@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -13,6 +14,12 @@ import (
 	badger "github.com/dgraph-io/badger/v3"
 	// "github.com/gocolly/colly"
 )
+
+func IsUrl(str string) bool {
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != ""
+}
+
 
 func readLines(path string) ([]string, error) {
     file, err := os.Open(path)
@@ -34,14 +41,15 @@ func timeTrack(start time.Time, name string) {
     log.Printf("%s took %s", name, elapsed)
 }
 
-func crawlWikipedia(article string) () {
+func crawlWikipedia(article string) (string) {
 
 	split_url := strings.Split(article, ":")
 	article_urlified := strings.ReplaceAll(split_url[len(split_url)-1], " ", "_")
 	crawl_url := "https://en.wikipedia.org/wiki/" + article_urlified
 
-    if strings.Contains(article, "%") {
-        return
+    if !IsUrl(crawl_url) {
+        fmt.Println(crawl_url)
+        return ""
     }
 	
     client := &http.Client{}
@@ -54,11 +62,14 @@ func crawlWikipedia(article string) () {
     resp, err := client.Do(res)
 
     if err != nil {
-        return 
+        return ""
     }
-    defer resp.Body.Close()
 
-	return
+    fmt.Println(resp)
+
+
+    defer resp.Body.Close()
+	return "true"
 }
 
 func main() {
@@ -86,7 +97,8 @@ func main() {
         go func() {
             defer wg.Done()
             for article := range in {
-                crawlWikipedia(article)
+                res := crawlWikipedia(article)
+                fmt.Println(res)
             }
         }()
     }
@@ -94,11 +106,8 @@ func main() {
     for _, line := range lines {
         if line != "" {
             in <- line
-            dberr := db.Update(func(txn *badger.Txn) error {
-                err := txn.Set([]byte(line), []byte(time))
-                return err
-            })
         }
+        break
     }
     close(in)
     wg.Wait()
