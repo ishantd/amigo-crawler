@@ -80,6 +80,11 @@ func main() {
     if err != nil {
         fmt.Println(err)
     }
+
+    var total_crawl int
+    fmt.Println("Enter the number of articles to crawl: ")
+    fmt.Scanln(&total_crawl)
+
     defer db.Close()
     const workers = 250
     
@@ -89,7 +94,10 @@ func main() {
 
     fmt.Println("Starting to crawl Wikipedia")
 
-    lines, err := readLines("../wiki1m.txt")
+    lines_all, err := readLines("../wiki.txt")
+    lines := lines_all[:total_crawl]
+
+    
     if err != nil {
         fmt.Println("readLines: %s", err)
     }
