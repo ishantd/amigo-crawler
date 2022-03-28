@@ -25,7 +25,7 @@ func main() {
 	// open a new index
 	defer timeTrack(time.Now(), "main")
 	mapping := bleve.NewIndexMapping()
-	index, err := bleve.New("test7.bleve", mapping)
+	index, err := bleve.New("test8.bleve", mapping)
 
 	if err != nil {
 		fmt.Println(err)

@@ -13,14 +13,14 @@ func main() {
 
 	// take user input
 
-	// var user_input string
-	// fmt.Print("Enter a search term: ")
-	// fmt.Scanln(&user_input)
-	user_input := "anti"
+	var user_input string
+	fmt.Print("Enter a search term: ")
+	fmt.Scanln(&user_input)
+	// user_input := "anti"
 	fmt.Println("Searching for:", user_input)
 	// open a new index
 
-	index, err := bleve.Open("test7.bleve")
+	index, err := bleve.Open("test8.bleve")
 	fmt.Println(index)
 	if err != nil {
 		fmt.Println(err)
