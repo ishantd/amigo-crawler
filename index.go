@@ -48,7 +48,7 @@ func main() {
 			wiki_doc := WikiDoc{Title: string(k), Body: string(v)}
 			batch.Index(uuid.New().String(), wiki_doc)
 			i++
-			if i > 100 {
+			if i > 10 {
 				index.Batch(batch)
 				i = 0
 			}
